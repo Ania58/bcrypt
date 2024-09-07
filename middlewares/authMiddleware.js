@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
-const {secret, hashedSecret} = require('../crypto/config')
+const {secret} = require('../crypto/config')
 const users = require('../data/users')
 
 const generateToken = (user) => {
-    return jwt.sign({user:user.id}, {secret, hashedSecret},{expireIn: '1h'})
+    return jwt.sign({user:user.id}, secret,{expiresIn: '1h'})
 }
 
 const verifyToken = (req,res,next) => {
@@ -12,7 +12,7 @@ const verifyToken = (req,res,next) => {
     if(!token) {
         return res.status(401).json({message: 'Token not provided'})
     }
-    jwt.verify(token, {secret, hashedSecret}, (err, decoded) => {
+    jwt.verify(token, secret, (err, decoded) => {
         if(err) {
             return res.status(401).json({message: 'Token invalid', error:err.message});
         }
@@ -20,3 +20,5 @@ const verifyToken = (req,res,next) => {
         next()
     })
 }
+
+module.exports = {generateToken,verifyToken}
