@@ -1,11 +1,28 @@
 const express = require('express')
-const jwt = require('jsonwebtoken')
-const session = require('express-session')
-const app = express()
 const router = express.Router()
 
 const users = require('../data/users')
 const {generateToken,verifyToken} = require('../middlewares/authMiddleware')
+
+router.get('/', (req,res) => {
+    if (req.session.token) {
+        res.redirect("/dashboard");
+    } else {
+    const loginForm = `
+    <form action ="/login" method="post">
+        <label for="username">User: </label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password: </label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Log in</button>
+    </form>
+    <a href="/dashboard">Dashboard</a>
+    `
+    res.send(loginForm);
+    }
+})
 
 router.post('/login', (req,res) => {
     //console.log(req.body); 
@@ -14,9 +31,9 @@ router.post('/login', (req,res) => {
     const user = users.find(user => user.username === username && user.password === password);
     if(user) {
         const token = generateToken(user);
-        console.log(token)
+        
         req.session.token = token;
-        //console.log(token)
+        
         res.redirect('/dashboard')
     } else {
         res.status(401).json({message: 'Credentials incorrect'})
